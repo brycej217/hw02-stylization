@@ -48,8 +48,17 @@ Shader "Custom/SurfaceShader"
                 return o;
             }
 
+            // returns 1 where toon highlihgt should be and 0 everywhere else
+            float ToonSpecular(float3 N, float3 V, float3 L, float attenuation)
+            {
+                float3 R = reflect(-L, N);
+                float spec = pow(max(dot(V, R), 0.0), 32.0) * 0.015 * attenuation;
+                return step(0.01, spec) * step(0.0, dot(N, L)); // spec > 0.01 && NdotL > 0
+            }
+
 			float4 frag(vout i) : SV_TARGET
 			{
+                // diffuse color
                 float3 N = normalize(i.normalWS);
                 float2 thresholds = float2(0.33, 0.66);
                 float3 ramped = float3(0.2, 0.4, 1.0);
@@ -75,7 +84,24 @@ Shader "Custom/SurfaceShader"
 
                 float3 output;
                 ChooseColor_float(highlight, midtone, shadow, diffuse, thresholds, output);
-                return float4(output, 1.0);
+
+                // specular highlihgting
+                float3 V = normalize(_WorldSpaceCameraPos - i.positionWS);
+                
+                // directional light
+                float spec = ToonSpecular(N, V, mainDir, distAttenuation * shadowAttenuation);
+
+                // additional lights
+                int lightCount = GetAdditionalLightsCount();
+                for (int li = 0; li < lightCount; ++li)
+                {
+                    Light light =  GetAdditionalLight(li, i.positionWS.xyz);
+                    spec = max(spec, ToonSpecular(N, V, light.direction, light.distanceAttenuation * light.shadowAttenuation));
+                }
+
+                float3 col = lerp(output, float3(1, 1, 1), spec); // interpolate between diffuse and white specular highlight
+
+                return float4(col, 1.0);
 			}
 
 			ENDHLSL
