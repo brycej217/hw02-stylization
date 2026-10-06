@@ -20,6 +20,11 @@ Shader "Custom/SurfaceShader"
 			HLSLPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
+
+            // necessary for material to be able to have shadows casted on it
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile _ _ADDITIONAL_LIGHT_SHADOWS
+
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             #include "Assets/Shaders/Includes/LightingHelp.hlsl"
@@ -116,8 +121,9 @@ Shader "Custom/SurfaceShader"
 
                 return float4(col, 1.0);
 			}
-
 			ENDHLSL
 		}
+
+        UsePass "Universal Render Pipeline/Lit/ShadowCaster"
     }
 }
