@@ -3,6 +3,8 @@ Shader "Custom/SurfaceShader"
     Properties
     {
         _BaseColor ("Base Color", Color) = (1,1,1,1)
+        _ShadowTex ("Shadow Texture", 2D) = "white" {}
+        _ShadowScale ("Shadow Scale", Float) = 1.0
     }
     SubShader
     {
@@ -23,18 +25,24 @@ Shader "Custom/SurfaceShader"
             #include "Assets/Shaders/Includes/LightingHelp.hlsl"
 
 			float4 _BaseColor;
+            float _ShadowScale;
+
+            TEXTURE2D(_ShadowTex);
+            SAMPLER(sampler_ShadowTex);
 
             struct appdata
             {
                 float4 positionOS : POSITION;
-                float3 normalOS   : NORMAL;
+                float3 normalOS : NORMAL;
+                float2 uv : TEXCOORD0;
             };
 
             struct vout
             {
                 float4 positionCS : SV_POSITION;
                 float3 positionWS : TEXCOORD0;
-                float3 normalWS   : TEXCOORD1;
+                float3 normalWS : TEXCOORD1;
+                float2 uv : TEXCOORD2;
             };
 
             vout vert(appdata v)
@@ -44,6 +52,7 @@ Shader "Custom/SurfaceShader"
                 o.positionCS = TransformObjectToHClip(v.positionOS.xyz);
                 o.positionWS = TransformObjectToWorld(v.positionOS.xyz);
                 o.normalWS   = TransformObjectToWorldNormal(v.normalOS);
+                o.uv = v.uv;
 
                 return o;
             }
@@ -82,8 +91,12 @@ Shader "Custom/SurfaceShader"
                 float3 midtone = float3(0.05, 0.2, 0.6);
                 float3 highlight = float3(0.15, 0.5, 1.0);
 
+                float shadowTex = SAMPLE_TEXTURE2D(_ShadowTex, sampler_ShadowTex, i.uv * _ShadowScale).r;
+
+                float3 texturedShadow = lerp(shadow, midtone, shadowTex);
+
                 float3 output;
-                ChooseColor_float(highlight, midtone, shadow, diffuse, thresholds, output);
+                ChooseColor_float(highlight, midtone, texturedShadow, diffuse, thresholds, output);
 
                 // specular highlihgting
                 float3 V = normalize(_WorldSpaceCameraPos - i.positionWS);
