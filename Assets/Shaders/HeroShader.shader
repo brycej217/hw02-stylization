@@ -147,5 +147,6 @@ Shader "Custom/HeroShader"
 		}
 
         UsePass "Universal Render Pipeline/Lit/ShadowCaster"
+        UsePass "Universal Render Pipeline/Lit/DepthOnly"
     }
 }

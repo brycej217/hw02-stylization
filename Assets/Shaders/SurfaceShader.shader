@@ -131,5 +131,6 @@ Shader "Custom/SurfaceShader"
 		}
 
         UsePass "Universal Render Pipeline/Lit/ShadowCaster"
+        UsePass "Universal Render Pipeline/Lit/DepthOnly"
     }
 }
