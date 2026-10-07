@@ -3,6 +3,7 @@ Shader "Custom/EdgeShader"
 	Properties
 	{
         _NormalTex ("Normal Buffer", 2D) = "black" {}
+        _ShadowBuffer ("Shadow Buffer", 2D) = "white" {}
         _EdgeColor ("Edge Color", Color) = (0, 0, 0, 1)
         _Thickness ("Thickness", Float) = 1.0
         _Threshold ("Threshold", Float) = 0.3
@@ -30,6 +31,9 @@ Shader "Custom/EdgeShader"
             SAMPLER(sampler_NormalTex);
             float4 _NormalTex_TexelSize;
 
+            TEXTURE2D(_ShadowBuffer);
+            SAMPLER(sampler_ShadowBuffer);
+
             float4 _EdgeColor;
             float _Thickness;
             float _Threshold;
@@ -46,6 +50,12 @@ Shader "Custom/EdgeShader"
                 output.positionCS = GetFullScreenTriangleVertexPosition(input.vertexID);
                 output.texcoord = GetFullScreenTriangleTexCoord(input.vertexID);
                 return output;
+            }
+
+            // used to sample shadow buffer
+            float S(float2 uv)
+            {
+                return SAMPLE_TEXTURE2D(_ShadowBuffer, sampler_ShadowBuffer, uv).r;
             }
 
             float3 N(float2 uv) // recieves normal from fullscreen buffer
@@ -69,10 +79,13 @@ Shader "Custom/EdgeShader"
                 float2 o = _NormalTex_TexelSize.xy * _Thickness;
 
                 // Roberts cross: compare the two diagonal pairs
-                float edge = length(N(nuv + float2(-o.x, -o.y)) - N(nuv + float2( o.x,  o.y)))
+                float normalEdge = length(N(nuv + float2(-o.x, -o.y)) - N(nuv + float2( o.x,  o.y)))
                            + length(N(nuv + float2( o.x, -o.y)) - N(nuv + float2(-o.x,  o.y)));
 
-                edge = step(_Threshold, edge);
+                float shadowEdge = abs(S(nuv + float2(-o.x, -o.y)) - S(nuv + float2( o.x,  o.y)))
+                 + abs(S(nuv + float2( o.x, -o.y)) - S(nuv + float2(-o.x,  o.y)));
+
+                float edge = max(step(_Threshold, normalEdge), step(0.5, shadowEdge));
                 return float4(lerp(sceneColor, _EdgeColor.rgb, edge), 1.0);
             }
             ENDHLSL
