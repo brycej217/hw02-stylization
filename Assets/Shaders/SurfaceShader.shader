@@ -2,7 +2,8 @@ Shader "Custom/SurfaceShader"
 {
     Properties
     {
-        _BaseColor ("Base Color", Color) = (1,1,1,1)
+        [MainColor] _BaseColor ("Base Color", Color) = (1,1,1,1)
+        [MainTexture] _BaseMap ("Base Map", 2D) = "white" {}
         _ShadowTex ("Shadow Texture", 2D) = "white" {}
         _ShadowScale ("Shadow Scale", Float) = 1.0
     }
@@ -31,6 +32,9 @@ Shader "Custom/SurfaceShader"
 
 			float4 _BaseColor;
             float _ShadowScale;
+
+            TEXTURE2D(_BaseMap);
+            SAMPLER(sampler_BaseMap);
 
             TEXTURE2D(_ShadowTex);
             SAMPLER(sampler_ShadowTex);
@@ -92,9 +96,11 @@ Shader "Custom/SurfaceShader"
                 
                 float diffuse = mainDiffuse + addDiffuse;
 
-                float3 shadow = float3(0.01, 0.05, 0.2);
-                float3 midtone = float3(0.05, 0.2, 0.6);
-                float3 highlight = float3(0.15, 0.5, 1.0);
+                float3 albedo = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, i.uv).rgb * _BaseColor.rgb;
+
+                float3 shadow    = albedo * 0.2;
+                float3 midtone   = albedo * 0.55;
+                float3 highlight = albedo;
 
                 float shadowTex = SAMPLE_TEXTURE2D(_ShadowTex, sampler_ShadowTex, i.uv * _ShadowScale).r;
 
