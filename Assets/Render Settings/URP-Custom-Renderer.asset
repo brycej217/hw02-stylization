@@ -37,8 +37,9 @@ MonoBehaviour:
     hdrDebugViewPS: {fileID: 4800000, guid: 573620ae32aec764abd4d728906d2587, type: 3}
   m_RendererFeatures:
   - {fileID: -2547812458937544290}
+  - {fileID: 5582527396159513007}
   - {fileID: 5587977230891160949}
-  m_RendererFeatureMap: 9e91b646115aa4dc75153d64af7b8c4d
+  m_RendererFeatureMap: 9e91b646115aa4dcaf61f9dc161f794d75153d64af7b8c4d
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 0}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -81,6 +82,25 @@ MonoBehaviour:
   m_CopyDepthMode: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
+--- !u!114 &5582527396159513007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 552c866e32d5f734daec12e70f016d2c, type: 3}
+  m_Name: NormalFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  normalsLayerMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  NormalsTexture: {fileID: 8400000, guid: ac22fa85652507f458ddf2548f33bc7f, type: 2}
+  _NormalsEvent: 300
+  normalsMaterial: {fileID: 2100000, guid: fb974e6ce226e524b99145fe96140518, type: 2}
 --- !u!114 &5587977230891160949
 MonoBehaviour:
   m_ObjectHideFlags: 0
